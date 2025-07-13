@@ -54,6 +54,9 @@ async function createLayerGroup(doc, groupName, channelType) {
         const layerGroup = await doc.createLayerGroup(groupOptions);
         await layerGroup.move(doc.layers[0], constants.ElementPlacement.PLACEBEFORE); // グループをドキュメントの先頭に
         
+        // レイヤーグループのブレンドモードを加算に設定
+        layerGroup.blendMode = constants.BlendMode.LINEARBURN;
+        
         // ベースのレイヤーを作成（ドキュメントレベルで作成）
         const layerOptions = { name: `${channelType}_Base` , color: constants.LabelColors.GRAY , fillNeutral: true , blendMode: constants.BlendMode.NORMAL };
         const baseLayer = await doc.createPixelLayer(layerOptions);
