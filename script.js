@@ -55,7 +55,7 @@ async function createLayerGroup(doc, groupName, channelType) {
         await layerGroup.move(doc.layers[0], constants.ElementPlacement.PLACEBEFORE); // グループをドキュメントの先頭に
         
         // レイヤーグループのブレンドモードを加算に設定
-        layerGroup.blendMode = constants.BlendMode.LINEARBURN;
+        layerGroup.blendMode = constants.BlendMode.LINEARDODGE;
         
         // ベースのレイヤーを作成（ドキュメントレベルで作成）
         const layerOptions = { name: `${channelType}_Base` , color: constants.LabelColors.GRAY , fillNeutral: true , blendMode: constants.BlendMode.NORMAL };
@@ -337,6 +337,87 @@ async function saveDocumentToFile(doc, filePath) {
     }
 }
 
+// グループに乗算レイヤーを追加する関数
+async function addMultiplyLayerToGroup(group, color, channelName, doc) {
+    try {
+        // グループを一時的にアクティブにしてからレイヤーを作成
+        doc.activeLayer = group;
+        
+        // RGBカラーの乗算レイヤーを作成（グループがアクティブな状態で作成）
+        const multiplyLayer = await doc.createPixelLayer({
+            name: `${channelName}_Multiply`,
+            blendMode: constants.BlendMode.MULTIPLY,
+            opacity: 100
+        });
+
+        // 作成されたレイヤーをグループ内に確実に移動
+        try {
+            await multiplyLayer.move(group, constants.ElementPlacement.PLACEINSIDE);
+        } catch (moveError) {
+            console.log(`移動エラー、再試行中: ${moveError.message}`);
+            // 移動に失敗した場合、グループ内の既存レイヤーの前に配置を試行
+            const groupLayers = group.layers;
+            if (groupLayers && groupLayers.length > 0) {
+                await multiplyLayer.move(groupLayers[0], constants.ElementPlacement.PLACEBEFORE);
+            }
+        }
+        
+        // レイヤーを指定されたRGB色で塗りつぶし
+        await fillLayerWithColor(multiplyLayer, color, doc);
+        
+        console.log(`乗算レイヤー ${channelName}_Multiply を作成しました`);
+        
+    } catch (error) {
+        console.error(`乗算レイヤー作成エラー (${channelName}):`, error);
+        throw error;
+    }
+}
+
+// レイヤーを指定色で塗りつぶす関数
+async function fillLayerWithColor(layer, rgbColor, doc) {
+    try {
+        const imaging = require('photoshop').imaging;
+        const width = doc.width;
+        const height = doc.height;
+        const components = 3; // RGB
+        
+        // 指定されたRGB色でデータを作成
+        const colorData = new Uint8Array(components * width * height);
+        for (let i = 0; i < components * width * height; i += components) {
+            colorData[i] = rgbColor[0];     // R
+            colorData[i + 1] = rgbColor[1]; // G  
+            colorData[i + 2] = rgbColor[2]; // B
+        }
+        
+        // ImageDataを作成
+        const imageData = await imaging.createImageDataFromBuffer(
+            colorData,
+            {
+                width: width,
+                height: height,
+                components: components,
+                colorProfile: "sRGB IEC61966-2.1",
+                colorSpace: "RGB"
+            }
+        );
+        
+        // レイヤーに色データを適用
+        await imaging.putPixels({
+            layerID: layer.id,
+            imageData: imageData,
+            targetBounds: { top: 0, left: 0 },
+            replace: true
+        });
+        
+        // ImageDataのメモリを解放
+        imageData.dispose();
+        
+    } catch (error) {
+        console.error('レイヤー塗りつぶしエラー:', error);
+        throw error;
+    }
+}
+
 // 高度なエクスポート機能（オプション選択付き）
 async function performAdvancedExport(doc, foundGroups) {
     try {
@@ -386,6 +467,10 @@ async function performAdvancedExport(doc, foundGroups) {
                     const sourceGroup = foundGroups[mapping.group];
                     const duplicatedGroup = await sourceGroup.duplicate(packedDoc);
                     duplicatedGroup.name = mapping.channelName;
+                    
+                    // 複製したグループの先頭にRGB乗算レイヤーを追加
+                    await addMultiplyLayerToGroup(duplicatedGroup, mapping.color, mapping.channelName, packedDoc);
+                    await duplicatedGroup.move(packedDoc.layers[0], constants.ElementPlacement.PLACEBEFORE);
                     
                     displayResult(`${mapping.group} → ${mapping.channelName} にマッピングしました`, 'info');
                 } catch (error) {
