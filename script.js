@@ -52,12 +52,50 @@ async function createLayerGroup(doc, groupName, channelType) {
         // レイヤーグループを作成（ルートレベルに作成される）
         const groupOptions = { name: groupName };
         const layerGroup = await doc.createLayerGroup(groupOptions);
+        await layerGroup.move(doc.layers[0], constants.ElementPlacement.PLACEBEFORE); // グループをドキュメントの先頭に
         
         // ベースのレイヤーを作成（ドキュメントレベルで作成）
         const layerOptions = { name: `${channelType}_Base` , color: constants.LabelColors.GRAY , fillNeutral: true , blendMode: constants.BlendMode.NORMAL };
         const baseLayer = await doc.createPixelLayer(layerOptions);
 
-        await layerGroup.move(doc.layers[0], constants.ElementPlacement.PLACEBEFORE); // グループをドキュメントの先頭に
+        // ベースレイヤーを白色で塗りつぶす
+        const imaging = require('photoshop').imaging;
+        const width = doc.width;
+        const height = doc.height;
+        const components = 3; // RGB
+        
+        // 白色データを作成（RGB: 255, 255, 255）
+        const whiteData = new Uint8Array(components * width * height);
+        for (let i = 0; i < components * width * height; i += components) {
+            whiteData[i] = 255;     // R
+            whiteData[i + 1] = 255; // G  
+            whiteData[i + 2] = 255; // B
+        }
+        
+        // ImageDataを作成
+        const imageData = await imaging.createImageDataFromBuffer(
+            whiteData,
+            {
+                width: width,
+                height: height,
+                components: components,
+                colorProfile: "sRGB IEC61966-2.1",
+                colorSpace: "RGB"
+            }
+        );
+        
+        // レイヤーに白色データを適用
+        await imaging.putPixels({
+            layerID: baseLayer.id,
+            imageData: imageData,
+            targetBounds: { top: 0, left: 0 },
+            replace: true
+        });
+        
+        // ImageDataのメモリを解放
+        imageData.dispose();
+
+        
         
         // 作成したグループを選択状態にする
         doc.activeLayer = layerGroup;
@@ -170,31 +208,6 @@ async function validateRequiredGroups(doc) {
     return { foundGroups, missingGroups };
 }
 
-// レイヤーグループを平坦化して単一レイヤーに変換
-async function flattenLayerGroup(doc, layerGroup) {
-    try {
-        // グループ内のレイヤーをすべて選択
-        doc.activeLayer = layerGroup;
-        
-        // 一時的な新しいレイヤーを作成してグループの内容をマージ
-        const tempLayer = await doc.createPixelLayer({ name: `temp_${layerGroup.name}` });
-        
-        // グループを一時レイヤーの下に移動
-        await layerGroup.move(tempLayer, "placeBefore");
-        
-        // グループと一時レイヤーを選択して結合
-        doc.activeLayer = tempLayer;
-        
-        // グループを選択状態に追加
-        // Note: 複数選択のAPIが限られているため、グループの可視レイヤーを結合
-        await layerGroup.merge();
-        
-        return tempLayer;
-    } catch (error) {
-        console.error('レイヤーグループ平坦化エラー:', error);
-        throw error;
-    }
-}
 
 // RGBチャンネルパッキングを実行
 async function performChannelPacking(doc, foundGroups) {
