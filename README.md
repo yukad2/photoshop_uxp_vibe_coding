@@ -1,3 +1,11 @@
+# リポジトリの説明
+このリポジトリは、GitHub Copilot Agent Mode + Claude Sonnet 4 に、コーディングをすべて依頼した実験用のものです。
+
+詳細は以下の記事をご覧ください。
+
+[Photoshop と GitHub Copilot で Vibe Coding](https://qiita.com/yukad2/items/1a1baf562902abfb8598)
+
+
 # Texture Packing Tool - Photoshop UXP Plugin
 
 テクスチャマップ（AO, Roughness, Metalness）を効率的にパッキングするPhotoshop UXPプラグインです。
