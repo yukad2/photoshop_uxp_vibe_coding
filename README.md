@@ -1,53 +1,97 @@
-# Photoshop UXP Plugin
+# Texture Packing Tool - Photoshop UXP Plugin
 
-Photoshop用のモダンなUXPプラグインプロジェクトです。
+テクスチャマップ（AO, Roughness, Metalness）を効率的にパッキングするPhotoshop UXPプラグインです。
 
 ## 概要
 
-このプラグインはAdobe PhotoshopのUXP（Unified Extensibility Platform）を使用して開発されています。HTML、CSS、JavaScriptを使用してPhotoshopの機能を拡張できます。
+このプラグインは3Dテクスチャ作成ワークフローを効率化するために設計されています。Ambient Occlusion、Roughness、Metalnessの各マップを個別のチャンネルに分けて管理し、最終的にRGBチャンネルにパッキングして出力できます。
 
-## 機能
+## 主要機能
 
-- **Hello World**: 基本的なプラグイン動作確認
-- **レイヤー情報取得**: アクティブドキュメントのレイヤー情報を表示
-- **新しいレイヤー作成**: プログラムでレイヤーを作成
+### Phase 3完了機能 ✅
+
+- **R:AO Create**: Ambient Occlusion用レイヤーグループ作成
+- **G:Rough Create**: Roughness用レイヤーグループ作成  
+- **B:Metal Create**: Metalness用レイヤーグループ作成
+- **Export**: 高度なRGBチャンネル合成エクスポート機能
+
+### Export機能の特徴
+
+1. **レイヤーグループの自動検証**: 必要なグループ（R_AO、G_Roughness、B_Metalness）の存在確認
+2. **エクスポートモード選択**: 
+   - 簡易エクスポート: 基本的なグループ複製
+   - 高度なエクスポート: チャンネル別マッピングと最適化
+3. **新規ドキュメント作成**: パッキング結果を新しいドキュメントで管理
+4. **インタラクティブな進行状況表示**: リアルタイムでの処理状況確認
+
+## 使用方法
+
+### 基本ワークフロー
+
+1. **チャンネル作成段階**:
+   - 各Createボタンでレイヤーグループを作成
+   - 各グループ内でテクスチャマップを作成・編集
+
+2. **エクスポート段階**:
+   - Exportボタンをクリック
+   - エクスポートモードを選択（高度なエクスポート推奨）
+   - 新しいドキュメントでパッキング結果を確認
+
+3. **最終調整**:
+   - 必要に応じてレイヤーを結合
+   - Photoshopの「ファイル → 保存」で最終テクスチャを保存
+
+### チャンネルマッピング
+
+- **Rチャンネル**: Ambient Occlusion (R_AO)
+- **Gチャンネル**: Roughness (G_Roughness)  
+- **Bチャンネル**: Metalness (B_Metalness)
+
+## 技術仕様
 
 ## プロジェクト構造
 
 ```
-photoshop_uxp/
-├── manifest.json      # プラグイン設定ファイル
-├── index.html         # メインUI
-├── script.js          # プラグインロジック
-├── styles.css         # UIスタイル
+texture_packing_tool/
+├── manifest.json      # プラグイン設定（ファイルシステム権限含む）
+├── index.html         # メインUI（4つのボタンレイアウト）
+├── script.js          # エクスポート機能とレイヤー管理ロジック
+├── styles.css         # チャンネル別色分けとレスポンシブUI
 ├── package.json       # Node.js設定
-└── README.md          # このファイル
+├── plan.md           # 開発計画書
+└── README.md         # このファイル
 ```
 
-## 開発環境のセットアップ
+### 使用API
 
-### 必要なツール
+- **Photoshop DOM API**: レイヤーグループ作成・管理
+- **UXP File System API**: ファイル保存機能（manifest.jsonで権限設定）
+- **executeAsModal**: 安全なPhotoshop操作実行
 
-1. **Adobe UXP Developer Tool**: Adobeの公式開発ツール
-2. **Visual Studio Code**: 推奨エディター
-3. **Photoshop 2023以降**: プラグインのテスト環境
+### エラーハンドリング
 
-### インストール手順
+- アクティブドキュメント存在確認
+- レイヤーグループ重複検出と警告
+- エクスポート時の必須グループ存在確認
+- 詳細なエラーメッセージとロギング
 
-1. UXP Developer Toolのダウンロード:
-   - [Adobe Developer Console](https://developer.adobe.com/)からダウンロード
+## 技術制約
 
-2. プラグインの読み込み:
-   ```
-   UXP Developer Tool > Add Plugin > このプロジェクトフォルダを選択
-   ```
+- **batchPlay APIは未使用**: 複雑すぎるため、DOM APIのみを使用
+- **手動チャンネル合成**: UXP APIの制限により、最終的なピクセル操作は手動
+- **クロスプラットフォーム対応**: Windows/Mac両対応
 
-3. Photoshopでのテスト:
-   - Photoshopを起動
-   - UXP Developer Toolで「Load」をクリック
-   - Photoshopのプラグインパネルから「My Plugin Panel」を開く
+## Phase 3実装完了項目
 
-## 開発ガイド
+✅ レイヤーグループ存在確認機能  
+✅ 簡易エクスポート機能（グループ複製）  
+✅ 高度なエクスポート機能（チャンネルマッピング）  
+✅ エクスポートモード選択ダイアログ  
+✅ 新規ドキュメント作成とレイヤー管理  
+✅ リアルタイム進行状況表示  
+✅ エラーハンドリング強化  
+✅ ユーザー向け操作指示表示  
+✅ マニフェストのファイルシステム権限設定
 
 ### manifest.json
 プラグインの基本設定と権限を定義します：

@@ -178,6 +178,88 @@ h2 {
     color: #aaaaaa;
 }
 
+/* Export-specific styles */
+.output-area .multi-line {
+    white-space: pre-line;
+    word-wrap: break-word;
+}
+
+.export-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.export-status .status-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.progress-indicator {
+    background-color: #404040;
+    border-radius: 4px;
+    height: 6px;
+    overflow: hidden;
+    margin: 8px 0;
+}
+
+.progress-bar {
+    background-color: #2196F3;
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.export-instructions {
+    background-color: #2d3142;
+    border-left: 3px solid #2196F3;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 0 4px 4px 0;
+    font-size: 10px;
+    line-height: 1.3;
+}
+
+.channel-mapping {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px 8px;
+    margin: 8px 0;
+    font-size: 10px;
+}
+
+.channel-mapping .channel {
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.channel-mapping .R { color: #ff6b6b; }
+.channel-mapping .G { color: #51cf66; }
+.channel-mapping .B { color: #74c0fc; }
+
+/* Responsive adjustments */
+@media (max-width: 300px) {
+    .button-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .export-btn {
+        font-size: 12px;
+        padding: 12px 16px;
+    }
+}
+
+/* Animation for status updates */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.output-area p {
+    animation: fadeIn 0.3s ease-out;
+}
+
 .success {
     color: #4CAF50;
     font-weight: 500;
