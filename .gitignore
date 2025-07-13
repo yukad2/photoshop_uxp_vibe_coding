@@ -1,0 +1,43 @@
+# UXP Plugin Git Ignore
+
+# Node modules
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+dist/
+build/
+
+# IDE files
+.vscode/settings.json
+.vscode/launch.json
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Adobe UXP specific
+.uxp/
+*.ccx
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local

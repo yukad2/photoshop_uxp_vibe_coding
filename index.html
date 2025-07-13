@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>My Photoshop Plugin</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Texture Packing Tool</h1>
+        <div class="panel">
+            <h2>チャンネル作成</h2>
+            <div class="button-grid">
+                <button id="create-ao-btn" class="create-btn ao-btn" title="Ambient Occlusion用レイヤーグループを作成">
+                    <span class="channel">R</span>
+                    <span class="label">AO Create</span>
+                </button>
+                <button id="create-rough-btn" class="create-btn rough-btn" title="Roughness用レイヤーグループを作成">
+                    <span class="channel">G</span>
+                    <span class="label">Rough Create</span>
+                </button>
+                <button id="create-metal-btn" class="create-btn metal-btn" title="Metalness用レイヤーグループを作成">
+                    <span class="channel">B</span>
+                    <span class="label">Metal Create</span>
+                </button>
+            </div>
+            
+            <h2>エクスポート</h2>
+            <button id="export-btn" class="export-btn" title="RGBチャンネルを合成してエクスポート">
+                <span class="export-icon">📦</span>
+                Export Packed Texture
+            </button>
+            
+            <div id="output" class="output-area">
+                <p>テクスチャパッキングツールが準備できました</p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

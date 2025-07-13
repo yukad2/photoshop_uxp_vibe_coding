@@ -1,0 +1,45 @@
+{
+  "id": "texture-packing-tool",
+  "name": "Texture Packing Tool",
+  "version": "1.0.0",
+  "host": {
+    "app": "PS",
+    "minVersion": "24.0.0"
+  },
+  "type": "panel",
+  "uiEntry": {
+    "type": "panel",
+    "label": "Texture Packing Tool"
+  },
+  "entrypoints": [
+    {
+      "type": "panel",
+      "id": "main-panel",
+      "minimumSize": {
+        "width": 200,
+        "height": 400
+      },
+      "maximumSize": {
+        "width": 1000,
+        "height": 2000
+      },
+      "preferredDockedSize": {
+        "width": 400,
+        "height": 800
+      },
+      "preferredFloatingSize": {
+        "width": 400,
+        "height": 800
+      }
+    }
+  ],
+  "main": "index.html",
+  "manifestVersion": 4,
+  "requiredPermissions": {
+    "allowCodeGenerationFromStrings": true,
+    "launchProcess": {
+      "schemes": ["https"],
+      "extensions": [".html"]
+    }
+  }
+}

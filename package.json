@@ -1,0 +1,22 @@
+{
+  "name": "photoshop-uxp-plugin",
+  "version": "1.0.0",
+  "description": "Photoshop UXP Plugin for modern plugin development",
+  "main": "script.js",
+  "scripts": {
+    "build": "echo 'Build complete'",
+    "dev": "echo 'Development mode - Plugin ready for testing'",
+    "package": "echo 'Packaging plugin for distribution'"
+  },
+  "keywords": [
+    "photoshop",
+    "uxp",
+    "plugin",
+    "adobe"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "@adobe/uxp-developer-tools": "^1.0.0"
+  }
+}

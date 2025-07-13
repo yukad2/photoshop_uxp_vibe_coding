@@ -1,0 +1,16 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "UXP Plugin Development",
+			"type": "shell",
+			"command": "echo",
+			"args": [
+				"UXP Plugin ready for development. Use UXP Developer Tool to load in Photoshop."
+			],
+			"group": "build",
+			"isBackground": false,
+			"problemMatcher": []
+		}
+	]
+}
