@@ -293,6 +293,7 @@ async function performSimpleExport(doc, foundGroups) {
         
         return {
             success: true,
+            document: packedDoc,
             message: "テクスチャパッキング用の新しいドキュメントが作成されました。各グループが複製されています。"
         };
 
@@ -305,35 +306,108 @@ async function performSimpleExport(doc, foundGroups) {
     }
 }
 
-// ファイル保存ダイアログ表示
-async function showSaveDialog() {
+// ファイル保存ダイアログを表示してファイルを選択
+async function showSaveDialog(defaultName = "packed_texture.png") {
     try {
-        const file = await fs.createSessionToken();
-        const entry = await fs.getFileForSaving("packed_texture.psd", {
-            types: ["psd", "jpg", "png"]
+        const entry = await fs.getFileForSaving(defaultName, {
+            types: ["png", "jpg", "psd"]
         });
         return entry;
     } catch (error) {
+        if (error.code === 'UserCanceledError') {
+            return null; // ユーザーがキャンセルした場合
+        }
         console.error('ファイル保存ダイアログエラー:', error);
-        return null;
+        throw error;
     }
 }
 
-// ドキュメントをファイルに保存
-async function saveDocumentToFile(doc, filePath) {
+// ドキュメントをPNG形式で保存
+async function saveDocumentAsPNG(doc, fileEntry) {
     try {
-        // UXP APIの制限により、直接的なファイル保存は制限される
-        // 代わりに、保存用の指示を表示
+        // Photoshop UXP APIを使用してPNGで保存
+        await doc.saveAs.png(fileEntry, {
+            quality: 100,
+            compression: 6,
+            interlaced: false
+        });
+        
         return {
             success: true,
-            message: "ドキュメントが準備されました。Photoshopの「ファイル → 保存」を使用してファイルを保存してください。"
+            message: `ファイルが正常に保存されました: ${fileEntry.name}`
         };
     } catch (error) {
-        console.error('ファイル保存エラー:', error);
+        console.error('PNG保存エラー:', error);
         return {
             success: false,
-            message: `ファイル保存中にエラーが発生しました: ${error.message}`
+            message: `PNG保存中にエラーが発生しました: ${error.message}`
         };
+    }
+}
+
+// ドキュメントをJPEG形式で保存
+async function saveDocumentAsJPEG(doc, fileEntry) {
+    try {
+        // Photoshop UXP APIを使用してJPEGで保存
+        await doc.saveAs.jpg(fileEntry, {
+            quality: 100,
+            embedColorProfile: true,
+            formatOptions: 'optimizeBaseline',
+            scans: 3,
+            matte: 'none'
+        });
+        
+        return {
+            success: true,
+            message: `ファイルが正常に保存されました: ${fileEntry.name}`
+        };
+    } catch (error) {
+        console.error('JPEG保存エラー:', error);
+        return {
+            success: false,
+            message: `JPEG保存中にエラーが発生しました: ${error.message}`
+        };
+    }
+}
+
+// ドキュメントをPSD形式で保存
+async function saveDocumentAsPSD(doc, fileEntry) {
+    try {
+        // Photoshop UXP APIを使用してPSDで保存
+        await doc.saveAs.psd(fileEntry, {
+            embedColorProfile: true,
+            layers: true,
+            spotColors: true,
+            alphaChannels: true,
+            annotations: true
+        });
+        
+        return {
+            success: true,
+            message: `ファイルが正常に保存されました: ${fileEntry.name}`
+        };
+    } catch (error) {
+        console.error('PSD保存エラー:', error);
+        return {
+            success: false,
+            message: `PSD保存中にエラーが発生しました: ${error.message}`
+        };
+    }
+}
+
+// ファイル拡張子に基づいて適切な保存関数を選択
+async function saveDocumentByFormat(doc, fileEntry) {
+    const fileName = fileEntry.name.toLowerCase();
+    
+    if (fileName.endsWith('.png')) {
+        return await saveDocumentAsPNG(doc, fileEntry);
+    } else if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')) {
+        return await saveDocumentAsJPEG(doc, fileEntry);
+    } else if (fileName.endsWith('.psd')) {
+        return await saveDocumentAsPSD(doc, fileEntry);
+    } else {
+        // デフォルトはPNG形式で保存
+        return await saveDocumentAsPNG(doc, fileEntry);
     }
 }
 
@@ -484,6 +558,7 @@ async function performAdvancedExport(doc, foundGroups) {
 
         return {
             success: true,
+            document: packedDoc,
             message: "高度なテクスチャパッキングが完了しました。各チャンネルが個別のレイヤーとして配置されています。"
         };
 
@@ -541,7 +616,7 @@ document.getElementById('export-btn').addEventListener('click', async () => {
                 
                 // 追加の操作指示
                 setTimeout(() => {
-                    displayResult('📝 次の手順:\n1. 各レイヤーグループの内容を確認\n2. 必要に応じてレイヤーを結合\n3. 「ファイル → 保存」でテクスチャを保存', 'info');
+                    displayResult('📝 次の手順:\n1. 各レイヤーグループの内容を確認\n2. 必要に応じてレイヤーを結合\n3. 「Save File」ボタンでテクスチャを保存', 'info');
                 }, 2000);
                 
             } else {
@@ -555,6 +630,110 @@ document.getElementById('export-btn').addEventListener('click', async () => {
     } catch (error) {
         displayResult(`エクスポートエラー: ${error.message}`, 'error');
         console.error('Export function error:', error);
+    }
+});
+
+// 保存ボタンのイベントリスナー
+document.getElementById('save-btn').addEventListener('click', async () => {
+    try {
+        const doc = checkActiveDocument();
+        if (!doc) return;
+
+        displayResult('ファイル保存ダイアログを開いています...', 'info');
+        
+        await require('photoshop').core.executeAsModal(async () => {
+            // ファイル保存ダイアログを表示
+            const fileEntry = await showSaveDialog(`${doc.name.replace(/\.[^/.]+$/, "")}_packed.png`);
+            
+            if (!fileEntry) {
+                displayResult('ファイル保存がキャンセルされました', 'warning');
+                return;
+            }
+            
+            displayResult(`ファイルを保存中: ${fileEntry.name}`, 'info');
+            
+            // ファイル形式に応じて保存
+            const result = await saveDocumentByFormat(doc, fileEntry);
+            
+            if (result.success) {
+                displayResult(result.message, 'success');
+            } else {
+                displayResult(result.message, 'error');
+            }
+            
+        }, {
+            commandName: 'Save Document'
+        });
+        
+    } catch (error) {
+        displayResult(`ファイル保存エラー: ${error.message}`, 'error');
+        console.error('Save function error:', error);
+    }
+});
+
+// エクスポート・保存ボタンのイベントリスナー
+document.getElementById('export-and-save-btn').addEventListener('click', async () => {
+    try {
+        const doc = checkActiveDocument();
+        if (!doc) return;
+
+        displayResult('エクスポートと保存を開始中...', 'info');
+        
+        await require('photoshop').core.executeAsModal(async () => {
+            // 必要なレイヤーグループの存在確認
+            const { foundGroups, missingGroups } = await validateRequiredGroups(doc);
+            
+            if (missingGroups.length > 0) {
+                displayResult(`不足しているレイヤーグループ: ${missingGroups.join(', ')}。先にCreateボタンでグループを作成してください。`, 'error');
+                return;
+            }
+            
+            // エクスポートモードの選択
+            const useAdvanced = await showExportOptions();
+            
+            let exportResult;
+            if (useAdvanced) {
+                displayResult('高度なエクスポートを実行中...', 'info');
+                exportResult = await performAdvancedExport(doc, foundGroups);
+            } else {
+                displayResult('簡易エクスポートを実行中...', 'info');
+                exportResult = await performSimpleExport(doc, foundGroups);
+            }
+            
+            if (!exportResult.success) {
+                displayResult(exportResult.message, 'error');
+                return;
+            }
+            
+            displayResult('エクスポート完了。ファイル保存ダイアログを開いています...', 'info');
+            
+            // ファイル保存ダイアログを表示
+            const fileEntry = await showSaveDialog("packed_texture.png");
+            
+            if (!fileEntry) {
+                displayResult('エクスポートは完了しましたが、ファイル保存がキャンセルされました', 'warning');
+                return;
+            }
+            
+            // エクスポートされたドキュメントを保存
+            const packedDoc = exportResult.document;
+            displayResult(`ファイルを保存中: ${fileEntry.name}`, 'info');
+            
+            const saveResult = await saveDocumentByFormat(packedDoc, fileEntry);
+            
+            if (saveResult.success) {
+                displayResult(`✅ エクスポートと保存が完了しました！\n${saveResult.message}`, 'success');
+            } else {
+                displayResult(`エクスポートは完了しましたが、保存でエラーが発生しました: ${saveResult.message}`, 'error');
+            }
+            
+        }, {
+            commandName: 'Export and Save Packed Texture'
+        });
+        
+    } catch (error) {
+        displayResult(`エクスポート・保存エラー: ${error.message}`, 'error');
+        console.error('Export and save function error:', error);
     }
 });
 

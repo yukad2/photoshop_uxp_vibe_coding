@@ -238,6 +238,86 @@ h2 {
 .channel-mapping .G { color: #51cf66; }
 .channel-mapping .B { color: #74c0fc; }
 
+/* Export section styling */
+.export-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-shrink: 0;
+}
+
+/* 保存ボタン */
+.save-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #34495e, #2c3e50);
+    color: white;
+    padding: 14px 20px;
+    font-size: 12px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-height: 44px;
+    box-sizing: border-box;
+}
+
+.save-btn:hover {
+    background: linear-gradient(135deg, #2c3e50, #1b2631);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.save-btn:active {
+    transform: translateY(0);
+}
+
+.save-icon {
+    font-size: 14px;
+}
+
+/* エクスポート・保存ボタン */
+.export-save-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #e67e22, #d35400);
+    color: white;
+    padding: 16px 20px;
+    font-size: 13px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-height: 48px;
+    box-sizing: border-box;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.export-save-btn:hover {
+    background: linear-gradient(135deg, #d35400, #a04000);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.export-save-btn:active {
+    transform: translateY(0);
+}
+
+.combined-icon {
+    font-size: 16px;
+    letter-spacing: 2px;
+}
+
 /* Responsive adjustments */
 @media (max-width: 300px) {
     .button-grid {

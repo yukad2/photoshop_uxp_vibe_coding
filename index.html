@@ -26,10 +26,20 @@
             </div>
             
             <h2>エクスポート</h2>
-            <button id="export-btn" class="export-btn" title="RGBチャンネルを合成してエクスポート">
-                <span class="export-icon">📦</span>
-                Export Packed Texture
-            </button>
+            <div class="export-section">
+                <button id="export-btn" class="export-btn" title="RGBチャンネルを合成してエクスポート">
+                    <span class="export-icon">📦</span>
+                    Export Packed Texture
+                </button>
+                <button id="save-btn" class="save-btn" title="現在のドキュメントをファイルに保存">
+                    <span class="save-icon">💾</span>
+                    Save File
+                </button>
+                <button id="export-and-save-btn" class="export-save-btn" title="エクスポートして直接ファイルに保存">
+                    <span class="combined-icon">📦💾</span>
+                    Export & Save
+                </button>
+            </div>
             
             <div id="output" class="output-area">
                 <p>テクスチャパッキングツールが準備できました</p>
