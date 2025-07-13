@@ -14,7 +14,7 @@
     "plugin",
     "adobe"
   ],
-  "author": "Your Name",
+  "author": "Yuka Ayukawa",
   "license": "MIT",
   "devDependencies": {
     "@adobe/uxp-developer-tools": "^1.0.0"
