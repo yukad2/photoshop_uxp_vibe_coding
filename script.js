@@ -381,16 +381,6 @@ async function performAdvancedExport(doc, foundGroups) {
         // 新しいドキュメントをアクティブにする
         app.activeDocument = packedDoc;
 
-        // 手順説明レイヤーを作成
-        try {
-            const instructionLayer = await packedDoc.createPixelLayer({ 
-                name: "INSTRUCTIONS_READ_ME" 
-            });
-            instructionLayer.visible = false;
-        } catch (error) {
-            console.log('説明レイヤーの作成をスキップ');
-        }
-
         return {
             success: true,
             message: "高度なテクスチャパッキングが完了しました。各チャンネルが個別のレイヤーとして配置されています。"
@@ -398,7 +388,7 @@ async function performAdvancedExport(doc, foundGroups) {
 
     } catch (error) {
         console.error('高度なエクスポートエラー:', error);
-        return {
+        return {    
             success: false,
             message: `高度なエクスポート処理中にエラーが発生しました: ${error.message}`
         };
@@ -434,8 +424,7 @@ document.getElementById('export-btn').addEventListener('click', async () => {
             displayResult(`検出されたグループ: ${Object.keys(foundGroups).join(', ')}`, 'info');
             
             // エクスポートモードの選択
-            // const useAdvanced = await showExportOptions();
-            const useAdvanced = false; // デフォルトは簡易エクスポート
+            const useAdvanced = await showExportOptions();
             
             let result;
             if (useAdvanced) {

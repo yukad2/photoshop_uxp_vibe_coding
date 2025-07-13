@@ -35,6 +35,9 @@
   ],
   "main": "index.html",
   "manifestVersion": 4,
+  "featureFlags": {
+    "enableAlerts": true
+  },
   "requiredPermissions": {
     "allowCodeGenerationFromStrings": true,
     "launchProcess": {
